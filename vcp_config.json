@@ -1,0 +1,10 @@
+{
+    "symbols_input": "TATACHEM",
+    "exchange": "NSE",
+    "timeframe": "1H",
+    "n_bars": 500,
+    "swing_length": 10,
+    "zone_percent": 1.0,
+    "target_percent": 10.0,
+    "stoploss_percent": 5.0
+}
