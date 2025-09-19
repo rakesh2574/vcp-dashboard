@@ -41,14 +41,14 @@ def convert_to_ist(df):
     # List of all timestamp columns
     timestamp_columns = [
         'Resistance Time', 'SwingLow1 Time', 'Touch1 Time',
-        'SwingLow2 Time', 'Touch2 Time', 'SwingLow3 Time',
+        'SwingLow2 Time', 'Touch2 Time', 'SwingLow3 Time', 
         'Touch3 Time', 'Breakout Time', 'Target Hit Time',
         'SL Hit Time', 'Analysis Time'
     ]
-
+    
     # Create a copy to avoid modifying original
     df_display = df.copy()
-
+    
     # Check if Exchange column exists
     if 'Exchange' in df_display.columns:
         for col in timestamp_columns:
@@ -57,11 +57,11 @@ def convert_to_ist(df):
                 for idx in df_display.index:
                     value = df_display.at[idx, col]
                     exchange = df_display.at[idx, 'Exchange']
-
+                    
                     # Skip if value is '-' or NaN
                     if pd.isna(value) or value == '-':
                         continue
-
+                    
                     try:
                         # Parse the timestamp string
                         if isinstance(value, str) and value != '-':
@@ -69,7 +69,7 @@ def convert_to_ist(df):
                             # Remove any existing timezone labels
                             clean_value = value.replace(' UTC', '').replace(' IST', '').replace(' EST', '')
                             dt = pd.to_datetime(clean_value)
-
+                            
                             # Convert based on exchange
                             if exchange in ['NSE', 'BSE']:
                                 # Add 5 hours 30 minutes for IST
@@ -85,7 +85,7 @@ def convert_to_ist(df):
                     except:
                         # If parsing fails, keep original value
                         pass
-
+    
     return df_display
 
 
@@ -125,7 +125,7 @@ def display_results_page():
         try:
             # Get the last modification time of the file
             last_modified_time = datetime.fromtimestamp(os.path.getmtime(output_filename))
-
+            
             # Convert file modification time to IST
             ist_modified_time = last_modified_time + timedelta(hours=5, minutes=30)
             st.success(
@@ -139,7 +139,7 @@ def display_results_page():
             else:
                 # Convert timestamps to appropriate timezone
                 df_display = convert_to_ist(df)
-
+                
                 # Show timezone information
                 if 'Exchange' in df.columns:
                     exchanges = df['Exchange'].unique()
@@ -151,33 +151,30 @@ def display_results_page():
                             timezone_info.append(f"**{exchange}**: Times shown in EST (UTC-5)")
                         elif exchange == 'BINANCE':
                             timezone_info.append(f"**{exchange}**: Times shown in UTC")
-
+                    
                     if timezone_info:
                         st.info("⏰ " + " | ".join(timezone_info))
-
+                
                 # --- Display Summary Metrics ---
                 st.subheader("📊 Summary")
                 col1, col2, col3, col4 = st.columns(4)
-
+                
                 with col1:
                     total_patterns = len(df_display)
                     st.metric("Total Patterns", total_patterns)
-
+                
                 with col2:
-                    valid_patterns = len(df_display[df_display[
-                                                        'Pattern Status'] == '✅ Valid']) if 'Pattern Status' in df_display.columns else 0
+                    valid_patterns = len(df_display[df_display['Pattern Status'] == '✅ Valid']) if 'Pattern Status' in df_display.columns else 0
                     st.metric("Valid Patterns", valid_patterns)
-
+                
                 with col3:
-                    setup_ready = len(df_display[df_display[
-                                                     'Trade Status'] == 'Setup Ready']) if 'Trade Status' in df_display.columns else 0
+                    setup_ready = len(df_display[df_display['Trade Status'] == 'Setup Ready']) if 'Trade Status' in df_display.columns else 0
                     st.metric("Setup Ready", setup_ready)
-
+                
                 with col4:
-                    ongoing = len(df_display[df_display[
-                                                 'Trade Status'] == 'Ongoing']) if 'Trade Status' in df_display.columns else 0
+                    ongoing = len(df_display[df_display['Trade Status'] == 'Ongoing']) if 'Trade Status' in df_display.columns else 0
                     st.metric("Ongoing Trades", ongoing)
-
+                
                 # --- Display Filters ---
                 st.subheader("🔍 Filter and View Data")
                 col1, col2, col3 = st.columns(3)
@@ -189,18 +186,17 @@ def display_results_page():
 
                 with col2:
                     # Filter by Trade Status
-                    unique_statuses = df_display[
-                        'Trade Status'].unique() if 'Trade Status' in df_display.columns else []
+                    unique_statuses = df_display['Trade Status'].unique() if 'Trade Status' in df_display.columns else []
                     selected_statuses = st.multiselect("Filter by Trade Status", options=unique_statuses,
                                                        default=unique_statuses)
-
+                
                 with col3:
                     # Filter by Pattern Status
                     if 'Pattern Status' in df_display.columns:
                         pattern_statuses = df_display['Pattern Status'].unique()
-                        selected_pattern_status = st.multiselect("Filter by Pattern Status",
-                                                                 options=pattern_statuses,
-                                                                 default=pattern_statuses)
+                        selected_pattern_status = st.multiselect("Filter by Pattern Status", 
+                                                                options=pattern_statuses,
+                                                                default=pattern_statuses)
                     else:
                         selected_pattern_status = []
 
@@ -224,14 +220,14 @@ def display_results_page():
                     file_name=f"filtered_vcp_results_{datetime.now().strftime('%Y%m%d_%H%M')}_IST.csv",
                     mime='text/csv',
                 )
-
+                
                 # --- Additional Analysis ---
                 with st.expander("📈 Additional Analysis"):
                     if 'Trade Status' in df_display.columns:
                         st.subheader("Trade Status Distribution")
                         status_counts = df_display['Trade Status'].value_counts()
                         st.bar_chart(status_counts)
-
+                    
                     if 'Symbol' in df_display.columns:
                         st.subheader("Patterns by Symbol")
                         symbol_counts = df_display['Symbol'].value_counts()
@@ -248,7 +244,7 @@ def display_results_page():
             f"The analysis runs automatically every hour. The file `{output_filename}` will appear after the next run.")
         st.info(
             f"You can also manually trigger an analysis by running: `python vcp_classic_csv.py --headless`")
-
+        
         # Show next run times in IST
         st.subheader("📅 Scheduled Run Times (IST)")
         current_time = datetime.now() + timedelta(hours=5, minutes=30)  # Convert to IST
