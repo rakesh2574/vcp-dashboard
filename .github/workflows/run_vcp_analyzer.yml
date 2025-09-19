@@ -2,6 +2,8 @@ name: Run VCP Analyzer
 
 on:
   schedule:
+    # TEST RUN - 7:15 PM IST (1:45 PM UTC) - REMOVE AFTER TESTING
+    - cron: '45 13 * * *'
     # Runs at 9:00 AM IST (3:30 AM UTC) every weekday
     - cron: '30 3 * * 1-5'
     # Runs at 3:00 PM IST (9:30 AM UTC) every weekday
