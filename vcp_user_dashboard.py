@@ -104,7 +104,7 @@ def check_password():
     password = st.text_input("Password", type="password", key="viewer_password")
 
     if st.button("Login"):
-        if username == "sherlock " and password == "watson":
+        if username == "sherlock" and password == "watson":
             st.session_state.viewer_password_correct = True
             st.rerun()
         else:
